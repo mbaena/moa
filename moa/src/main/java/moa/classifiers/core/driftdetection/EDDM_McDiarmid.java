@@ -21,7 +21,7 @@ public class EDDM_McDiarmid extends AbstractChangeDetector {
             "windowSize",
             'w',
             "The size of sliding window.",
-            30, 1, Integer.MAX_VALUE);
+            100, 1, Integer.MAX_VALUE);
 
     public FloatOption EDDM_DELTA = new FloatOption(
             "delta",
@@ -35,8 +35,8 @@ public class EDDM_McDiarmid extends AbstractChangeDetector {
     private int num_instances; // count the number of instances processed
     private double numErrors; // count the number of errors (wrong prediction)
 
-    private int pos_last_error;         // position of last error 
-    private int pos_prelast_error;      // position of previous error 
+    private int pos_last_error;         // position of last error
+    private int pos_prelast_error;      // position of previous error
 
     private double cte_epsilon;  // constant value to avoid some calculations
     private double epsilon;      // epsilon by using McDiarmid's bound
@@ -99,23 +99,24 @@ public class EDDM_McDiarmid extends AbstractChangeDetector {
             // add new distance in sliding window
             window.addElement(distance);
 
-            if (window.isFull()) {
-                System.out.println(" n = " + num_instances +
-                        " -- epsilon = " + String.format("%.3f", epsilon) +
-                        " -- window.getAverage() = " + window.getAverage() +
-                        " -- max_mtbf = " + String.format("%.3f", max_mtbf) +
-                        " -- min_epsilon = " + String.format("%.3f", min_epsilon) +
-                        " -- max_lower_bound = " + String.format("%.3f", max_lower_bound));
+            // for debug purpose
+//            System.out.println(" n = " + num_instances +
+//                    " -- epsilon = " + String.format("%.3f", epsilon) +
+//                    " -- window.getAverage() = " + String.format("%.3f", window.getAverage()) +
+//                    " -- max_mtbf = " + String.format("%.3f", max_mtbf) +
+//                    " -- min_epsilon = " + String.format("%.3f", min_epsilon) +
+//                    " -- max_lower_bound = " + String.format("%.3f", max_lower_bound));
 
+            if (window.isFull()) {
                 // if new average value in the window is outside the estimated interval
                 if (window.getAverage() < max_lower_bound) {
                     this.isChangeDetected = true;
-                    System.out.println("CHANGE at: num_instances = " + num_instances + " numErrors = " + numErrors);
+//                    System.out.println("CHANGE at: num_instances = " + num_instances + " numErrors = " + numErrors);
 
                 }
 
                 // calculation of error with McDiarmid's bound
-                epsilon = Math.sqrt(cte_epsilon * window.getSumSquared_C_iBATCH());
+                epsilon = Math.sqrt(cte_epsilon * window.getSumSquared_C_i());
 
                 // updating interval if it improves (is tighter) the last one stored
                 if ((window.getAverage() - epsilon) > (max_mtbf - min_epsilon)) {
@@ -126,9 +127,9 @@ public class EDDM_McDiarmid extends AbstractChangeDetector {
             }
         }
         // there is no error
-        else {
+//        else {
 //             System.out.println("NO ERROR: num_instances = " + num_instances + " numErrors = " + numErrors);
-        }
+//        }
     }
 
     @Override
